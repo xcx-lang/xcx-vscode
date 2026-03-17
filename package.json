@@ -2,8 +2,8 @@
     "name": "xcx-vscode",
     "displayName": "XCX Language Support",
     "description": "Rich language support for XCX 2.0 — syntax highlighting, snippets, diagnostics (missing semicolons, unclosed blocks).",
-    "version": "1.5.0",
-    "publisher": "Heisenberg",
+    "version": "1.0.0",
+    "publisher": "xcx-lang",
     "icon": "images/icon.png",
     "engines": {
         "vscode": "^1.7.0"
