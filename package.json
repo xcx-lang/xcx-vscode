@@ -1,9 +1,18 @@
 {
     "name": "xcx-vscode",
     "displayName": "XCX Language Support",
-    "description": "Rich language support for XCX 2.0 — syntax highlighting, snippets, diagnostics (missing semicolons, unclosed blocks).",
-    "version": "1.0.0",
+    "description": "Rich language support for XCX 3.0 — syntax highlighting, snippets, diagnostics (missing semicolons, unclosed blocks, database, terminal, input).",
+    "version": "3.0.0",
     "publisher": "xcx-lang",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/xcx-lang/xcx-vscode"
+    },
+    "license": "MIT",
+    "homepage": "https://github.com/xcx-lang/xcx-vscode#readme",
+    "bugs": {
+        "url": "https://github.com/xcx-lang/xcx-vscode/issues"
+    },
     "icon": "images/icon.png",
     "engines": {
         "vscode": "^1.7.0"
@@ -15,10 +24,12 @@
     ],
     "keywords": [
         "xcx",
-        "xcx2",
+        "xcx3",
+        "xcx3.0",
         "programming language",
         "fiber",
-        "coroutine"
+        "coroutine",
+        "pax"
     ],
     "activationEvents": [
         "onLanguage:xcx",

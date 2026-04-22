@@ -38,6 +38,7 @@ function validateDocument(document, diagnostics) {
         checkEndSemicolon(trimmed, raw, i, errors);
         checkElseSemicolon(trimmed, raw, i, errors);
         checkUnclosedRawBlock(trimmed, raw, i, errors);
+        checkYieldFrom(trimmed, raw, i, errors);
     }
     checkRawBlockBalance(lines, errors);
     diagnostics.set(document.uri, errors);
@@ -72,25 +73,37 @@ function checkMissingSemicolon(trimmed, raw, i, errors) {
     const skip = [
         /^\{$/, /\{$/, /^end[;\s]/, /^end$/, /^\};/, /^\}$/,
         /^---/, /^<<</, /^>>>/, /^serve:/, /^table:/, /^map:/,
-        /^columns\s*=/, /^rows\s*=/, /^schema\s*=/, /^data\s*=/,
+        /^database:/, /^columns\s*=/, /^rows\s*=/, /^schema\s*=/, /^data\s*=/,
         /^port\s*=/, /^host\s*=/, /^workers\s*=/, /^routes\s*=/,
+        /^engine\s*=/, /^path\s*=/, /^timeout\s*=/, /^readonly\s*=/,
         /^\[/, /^\]$/, /,$/, /^".*::/, /^\*/,
         /^elseif\b/, /^elif\b/, /^elf\b/, /^else[;\s]/, /^els[;\s]/,
         /^else$/, /^els$/,
+        /^yield\s+from\b/,
+        /^net\.request\s*\{/, /^net\.request\s*$/,
+        /^method\s*=/, /^url\s*=/, /^headers\s*=/, /^body\s*=/, /^workers\s*=/,
     ];
     for (const p of skip) if (p.test(trimmed)) return;
 
     const needs = [
-        /^(i|f|s|b|json|date|array:[a-z]+|set:[NZQSBC]|map|table|fiber(:[a-zA-Z]+)?)\s*:/,
+        // short-form primitive type declarations: i: x = ..., f: y = ..., etc.
+        /^(i|f|s|b)\s*:/,
+        // long-form aliases: int: x, float: y, str: z, bool: flag
+        /^(int|float|str|bool)\s*:/,
+        // complex types
+        /^(json|date|array:[a-z]+|set:[NZQSBC]|map|table|fiber(:[a-zA-Z]+)?|database)\s*:/,
         /^const\s/, /^>!/, /^>\?/, /^@wait\s/,
         /^halt\.(alert|error|fatal)/,
         /^include\s/, /^yield\b/, /^return\b/,
         /^break$/, /^continue$/,
         /^\.[a-zA-Z]+\s*![a-z]+/,
+        /^\.terminal\s*!/,
         /^[a-zA-Z_][a-zA-Z0-9_.]*\s*=[^=]/,
         /^[a-zA-Z_][a-zA-Z0-9_.]*\(.*\)\s*$/,
         /^store\./, /^db\.[a-zA-Z]+\.(insert|update|delete)/,
-        /^[a-zA-Z_][a-zA-Z0-9_.]*\.(insert|update|delete|push|set|bind)\(/,
+        /^[a-zA-Z_][a-zA-Z0-9_.]*\.(insert|update|delete|push|set|bind|add|remove|clear|sync|drop|save|truncate|exec|begin|commit|rollback|close)\(/,
+        /^input\.(key|ready)\(/,
+        /^[a-zA-Z_][a-zA-Z0-9_]*\.(begin|commit|rollback|close)\(\)/,
     ];
     let should = false;
     for (const p of needs) if (p.test(trimmed)) { should = true; break; }
@@ -156,6 +169,15 @@ function checkUnclosedRawBlock(trimmed, raw, i, errors) {
         errors.push(makeDiag(i, col, col + 3,
             "Niezamknięty blok JSON '<<<' — brakuje '>>>'.",
             vscode.DiagnosticSeverity.Warning));
+    }
+}
+
+function checkYieldFrom(trimmed, raw, i, errors) {
+    if (!/^yield\s+from\b/.test(trimmed)) return;
+    if (!/^yield\s+from\s+[a-zA-Z_][a-zA-Z0-9_]*\s*;/.test(trimmed)) {
+        const col = endCol(raw);
+        errors.push(makeDiag(i, 0, raw.length,
+            "'yield from' musi być w formie: yield from <nazwa_fibera>;"));
     }
 }
 

@@ -3,63 +3,27 @@
     "name": "XCX",
     "scopeName": "source.xcx",
     "patterns": [
-        {
-            "include": "#comments"
-        },
-        {
-            "include": "#raw_blocks"
-        },
-        {
-            "include": "#strings"
-        },
-        {
-            "include": "#fiber_type"
-        },
-        {
-            "include": "#keywords_control"
-        },
-        {
-            "include": "#keywords_fiber"
-        },
-        {
-            "include": "#keywords_builtin"
-        },
-        {
-            "include": "#keywords_logical"
-        },
-        {
-            "include": "#keywords_set_ops"
-        },
-        {
-            "include": "#types"
-        },
-        {
-            "include": "#type_domains"
-        },
-        {
-            "include": "#constants"
-        },
-        {
-            "include": "#decorators"
-        },
-        {
-            "include": "#io_operators"
-        },
-        {
-            "include": "#operators"
-        },
-        {
-            "include": "#numbers"
-        },
-        {
-            "include": "#builtin_modules"
-        },
-        {
-            "include": "#identifiers"
-        },
-        {
-            "include": "#punctuation"
-        }
+        { "include": "#comments" },
+        { "include": "#raw_blocks" },
+        { "include": "#strings" },
+        { "include": "#fiber_type" },
+        { "include": "#keywords_control" },
+        { "include": "#keywords_fiber" },
+        { "include": "#keywords_builtin" },
+        { "include": "#keywords_logical" },
+        { "include": "#keywords_set_ops" },
+        { "include": "#types" },
+        { "include": "#type_domains" },
+        { "include": "#column_attributes" },
+        { "include": "#constants" },
+        { "include": "#decorators" },
+        { "include": "#terminal_commands" },
+        { "include": "#io_operators" },
+        { "include": "#operators" },
+        { "include": "#numbers" },
+        { "include": "#builtin_modules" },
+        { "include": "#identifiers" },
+        { "include": "#punctuation" }
     ],
     "repository": {
         "comments": {
@@ -83,14 +47,10 @@
                     "begin": "<<<",
                     "end": ">>>",
                     "beginCaptures": {
-                        "0": {
-                            "name": "punctuation.definition.string.begin.xcx"
-                        }
+                        "0": { "name": "punctuation.definition.string.begin.xcx" }
                     },
                     "endCaptures": {
-                        "0": {
-                            "name": "punctuation.definition.string.end.xcx"
-                        }
+                        "0": { "name": "punctuation.definition.string.end.xcx" }
                     }
                 }
             ]
@@ -148,7 +108,12 @@
             "patterns": [
                 {
                     "name": "support.function.builtin.xcx",
-                    "match": "\\b(halt|alert|error|fatal|terminal|store|random|choice|from)\\b"
+                    "match": "\\b(halt|alert|error|fatal|terminal|store|random|choice|input)\\b"
+                },
+                {
+                    "comment": "'from' in random.choice from / yield from",
+                    "name": "keyword.control.xcx",
+                    "match": "\\bfrom\\b"
                 }
             ]
         },
@@ -180,12 +145,22 @@
             "patterns": [
                 {
                     "name": "storage.type.xcx",
-                    "match": "\\b(array|set|map|table|json|date)\\b"
+                    "match": "\\b(array|set|map|table|json|date|database)\\b"
                 },
                 {
                     "comment": "Single-letter primitive types only when used as type annotation (followed by :)",
                     "name": "storage.type.primitive.xcx",
                     "match": "(?<![a-zA-Z0-9_])\\b(i|f|s|b)\\b(?=\\s*:)"
+                },
+                {
+                    "comment": "Long-form type aliases when used as type annotation (followed by :)",
+                    "name": "storage.type.primitive.xcx",
+                    "match": "(?<![a-zA-Z0-9_])\\b(int|float|str|bool)\\b(?=\\s*:)"
+                },
+                {
+                    "comment": "Type cast functions: i(...), f(...), s(...)",
+                    "name": "storage.type.primitive.xcx",
+                    "match": "(?<![a-zA-Z0-9_])\\b(i|f|s)\\b(?=\\s*\\()"
                 }
             ]
         },
@@ -195,6 +170,15 @@
                     "comment": "Set domain specifiers after set:",
                     "name": "support.type.domain.xcx",
                     "match": "(?<=set:)(N|Z|Q|S|B|C)\\b"
+                }
+            ]
+        },
+        "column_attributes": {
+            "patterns": [
+                {
+                    "comment": "Table column attributes: @auto, @pk, @unique, @optional, @default, @fk",
+                    "name": "keyword.other.column-attribute.xcx",
+                    "match": "@(auto|pk|unique|optional|default|fk)\\b"
                 }
             ]
         },
@@ -214,11 +198,16 @@
             "patterns": [
                 {
                     "name": "keyword.other.decorator.xcx",
-                    "match": "@(auto|step|wait)\\b"
-                },
+                    "match": "@(step|wait)\\b"
+                }
+            ]
+        },
+        "terminal_commands": {
+            "patterns": [
                 {
-                    "name": "keyword.other.terminal.xcx",
-                    "match": "\\.terminal\\s+!(clear|exit)\\b"
+                    "comment": ".terminal !command — full directive",
+                    "name": "support.function.terminal.xcx",
+                    "match": "\\.terminal\\s+!(clear|exit|run|raw|normal|cursor|move|write)\\b"
                 }
             ]
         },
@@ -237,8 +226,13 @@
         "operators": {
             "patterns": [
                 {
+                    "comment": "Integer digit concatenation ++ (must come before arithmetic +)",
+                    "name": "keyword.operator.concat.xcx",
+                    "match": "\\+\\+"
+                },
+                {
                     "name": "keyword.operator.arithmetic.xcx",
-                    "match": "\\+\\+|\\^|[+\\-*/%]"
+                    "match": "\\^|[+\\-*/%]"
                 },
                 {
                     "name": "keyword.operator.comparison.xcx",
@@ -278,7 +272,7 @@
             "patterns": [
                 {
                     "name": "support.class.builtin.xcx",
-                    "match": "\\b(crypto|net|env|date|store|random)(?=\\.)"
+                    "match": "\\b(crypto|net|env|date|store|random|input)(?=\\.)"
                 }
             ]
         },
@@ -302,7 +296,7 @@
                     "match": ";"
                 },
                 {
-                    "name": "punctuation.separator.comma.xcx",
+                    "name": "punctuation.separator.range.xcx",
                     "match": ",,"
                 },
                 {
